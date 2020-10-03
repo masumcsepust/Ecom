@@ -3,6 +3,7 @@ using API.Helpers;
 using API.MiddleWare;
 using AutoMapper;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,11 @@ namespace API
             services.AddDbContext<ApplicationDbContext>(x => 
             x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
 
+            // AppIdentityDbContext Configuration
+            services.AddDbContext<AppIdentityDbContext>( x => {
+                x.UseSqlite(_config.GetConnectionString("IdentityConnection"));
+            });
+
             //Redis Configuration
             services.AddSingleton<IConnectionMultiplexer>(c => {
                 var configuration = ConfigurationOptions.Parse( _config.GetConnectionString("Redis"), true);
@@ -37,6 +43,7 @@ namespace API
 
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddApplicationServices();
+            services.AddIdentityServices(_config);
             services.AddSwaggerDocumentation();
             services.AddCors(opt => 
             {
@@ -59,7 +66,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
