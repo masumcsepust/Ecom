@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Basket, IBasket, IBasketItem, IBasketTotal } from '../shared/models/basket';
+import { IDelivaryMethod } from '../shared/models/delivaryMethod';
 import { IProduct } from '../shared/models/product';
 
 @Injectable({
@@ -15,8 +16,16 @@ export class BasketService {
   basket$ = this.basketSource.asObservable();
   private basketTotalSource = new BehaviorSubject<IBasketTotal>(null);
   basketTotal$ = this.basketTotalSource.asObservable();
+  shipping = 0;
 
   constructor(private http: HttpClient) { }
+
+  setShippingPrice(deliveryMethod: IDelivaryMethod) {
+    this.shipping = deliveryMethod.price;
+    const basket = this.getCurrentBasketValue();
+    this.calculateTotals();
+    this.setBasket(basket);
+  }
 
   getBasket(id: string) {
     return this.http.get(this.baseUrl + 'basket?id=' + id)
@@ -86,6 +95,11 @@ export class BasketService {
    }
  }
 
+   deleteLocalBasket(id: string) {
+     this.basketSource.next(null);
+     this.basketTotalSource.next(null);
+     localStorage.removeItem('basket_id');
+   }
    // Delete basket
    deleteBasket(basket: IBasket) {
      return this.http.delete(this.baseUrl + 'basket?id=' + basket.id).subscribe(() => {
@@ -100,10 +114,10 @@ export class BasketService {
   // Calculate Totals
 private calculateTotals() {
   const basket = this.getCurrentBasketValue();
-  const shipping = 0;
+  const shipping = this.shipping;
   const subtotal = basket.items.reduce((a, b) => (b.price * b.quantity) + a, 0);
-  const total = shipping + subtotal;
-  this.basketTotalSource.next({shipping, subtotal, total});
+  const total = subtotal + shipping ;
+  this.basketTotalSource.next({shipping, total, subtotal});
 }
 
   private addOrUpdateItem(items: IBasketItem[], itemToAdd: IBasketItem, quantity: number): IBasketItem[] {
@@ -130,7 +144,7 @@ private calculateTotals() {
       price: item.price,
       pictureUrl: item.pictureUrl,
       quantity,
-      brand: item.brandType,
+      brand: item.productBrand,
       type: item.productType
     };
   }

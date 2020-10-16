@@ -16,11 +16,19 @@ namespace API.Extensions
             // Token Services 
             services.AddScoped<ITokenService, TokenService>();
 
+            // Order Services
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
             // Product Services
             services.AddScoped<IProductRepository, ProductRepository>();
 
             // Basket Services
             services.AddScoped<IBasketRepository, BasketRepository>();
+
+            // Unit of Work services
+            
             services.AddScoped(typeof(IGenericRepository<>),(typeof(GenericRepository<>)));
             services.Configure<ApiBehaviorOptions>(options =>
             {

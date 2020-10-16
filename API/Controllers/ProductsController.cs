@@ -17,7 +17,7 @@ namespace API.Controllers
 {
     public class ProductsController: BaseApiController
     {
-        
+
         private readonly IGenericRepository<Product> _productsRepo;
         private readonly IGenericRepository<ProductBrand> _brandsRepo;
         private readonly IGenericRepository<ProductType> _typesRepo;
