@@ -13,22 +13,22 @@ namespace API.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
 
+
+            // Cache Service
+            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
             // Token Services 
             services.AddScoped<ITokenService, TokenService>();
 
             // Order Services
             services.AddScoped<IOrderService, OrderService>();
+            // Payment Services
+            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-
             // Product Services
             services.AddScoped<IProductRepository, ProductRepository>();
-
             // Basket Services
             services.AddScoped<IBasketRepository, BasketRepository>();
-
             // Unit of Work services
-            
             services.AddScoped(typeof(IGenericRepository<>),(typeof(GenericRepository<>)));
             services.Configure<ApiBehaviorOptions>(options =>
             {

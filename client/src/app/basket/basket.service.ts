@@ -20,10 +20,24 @@ export class BasketService {
 
   constructor(private http: HttpClient) { }
 
+  // Payment Intent
+  getPaymentIntent() {
+    return this.http.post(this.baseUrl + 'payments/' + this.getCurrentBasketValue().id, {})
+       .pipe(
+         map((basket: IBasket) => {
+           this.basketSource.next(basket);
+         }, error => {
+           console.log(error);
+         })
+       );
+  }
+
   setShippingPrice(deliveryMethod: IDelivaryMethod) {
     this.shipping = deliveryMethod.price;
     const basket = this.getCurrentBasketValue();
+    basket.deliveryMethodId = deliveryMethod.id;
     this.calculateTotals();
+    basket.shippingPrice = deliveryMethod.price;
     this.setBasket(basket);
   }
 
@@ -32,6 +46,7 @@ export class BasketService {
        .pipe(
          map((basket: IBasket) => {
            this.basketSource.next(basket);
+           this.shipping = basket.shippingPrice;
            this.calculateTotals();
          })
        );
